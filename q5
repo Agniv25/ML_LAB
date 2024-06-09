@@ -1,54 +1,52 @@
-import numpy as np 
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, r2_score, confusion_matrix
-from sklearn.datasets import load_iris
-from matplotlib import pyplot as plt
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 
-# Load the iris dataset
-data = load_iris()
-X = data.data
-y = data.target
+# Load the diabetes dataset
+diabetes_df = pd.read_csv("diabetes.csv")
 
-# Split dataset into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Split features and target variable
+X = diabetes_df.drop(columns=["Outcome"])
+Y = diabetes_df["Outcome"]
 
-# Initialize and train the logistic regression model
+# Split the dataset into training and testing sets
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+
+# Train a logistic regression model
 model = LogisticRegression()
-model.fit(X_train, y_train)
+model.fit(X_train, Y_train)
 
 # Make predictions
-y_pred = model.predict(X_test)
+Y_pred = model.predict(X_test)
 
-# Calculate performance metrics
-acc = accuracy_score(y_test, y_pred)
-pre = precision_score(y_test, y_pred, average='weighted')
-rec = recall_score(y_test, y_pred, average='weighted')
-f1 = f1_score(y_test, y_pred, average='weighted')
+# Calculate evaluation metrics
+acc = accuracy_score(Y_test, Y_pred)
+prec = precision_score(Y_test, Y_pred, average="weighted")
+rec = recall_score(Y_test, Y_pred, average="weighted")
+f1 = f1_score(Y_test, Y_pred, average="weighted")
+mse = np.sqrt(mean_squared_error(Y_test, Y_pred))
+r2 = r2_score(Y_test, Y_pred)
 
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-r2 = r2_score(y_test, y_pred)
+# Calculate confusion matrix
+conf_mat = confusion_matrix(Y_test, Y_pred)
 
-conf = confusion_matrix(y_test, y_pred)
-
-# Print performance metrics
-print(f'Accuracy: {acc}')
-print(f'Precision: {pre}')
-print(f'Recall: {rec}')
-print(f'F1 Score: {f1}')
-print(f'RMSE: {rmse}')
-print(f'R2 Score: {r2}')
-
-# Plot confusion matrix
-plt.figure(figsize=(10, 10))
-plt.imshow(conf, interpolation='nearest', cmap=plt.cm.Blues)
-plt.colorbar()
-tick_marks = np.arange(len(data.target_names))
-class_names = data.target_names
-plt.xticks(tick_marks, class_names, rotation=45)
-plt.yticks(tick_marks, class_names)
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
+# Print evaluation metrics
+print("Accuracy:", acc)
+print("Precision:", prec)
+print("Recall:", rec)
+print("F1 Score:", f1)
+print("Root Mean Squared Error:", mse)
+print("R2 Score:", r2)
+print("Confusion Matrix:\n", conf_mat)
+# plt.scatter(X_test,Y_test,label="actual")
+sns.heatmap(conf_mat, annot=True, xticklabels=['Predicted 0', 'Predicted 1'], yticklabels=['Actual 0', 'Actual 1'])
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
 plt.title('Confusion Matrix')
 plt.show()
+
+
